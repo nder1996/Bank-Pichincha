@@ -1,0 +1,286 @@
+<style>
+    .NoHayDatosMarcas {
+        height: 100%;
+        overflow: auto;
+    }
+
+    .container-filter-marca {
+        /*   border: 1px solid red;*/
+    }
+
+    .container-filter-marca .row {
+        /* border: 1px solid black;*/
+    }
+
+    .container-filter-marca .row .col-3 {
+        border: 1px solid whitesmoke;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    mat-form-field {
+        width: 100%;
+    }
+
+    mat-form-field i {
+        margin-right: 1rem;
+    }
+
+
+    .cardCrudDashboard {
+        /* border: 1px solid black !important;*/
+        padding: 10px !important;
+    }
+
+
+    mat-card-content {
+        /* border: 1px solid red !important;*/
+    }
+
+    .container-scroll {
+        max-height: 70vh;
+        /* Establece la altura máxima deseada */
+        overflow-y: auto;
+        /* Habilita el scroll vertical cuando sea necesario */
+    }
+
+    /**/
+    .hidden-column {
+        display: none;
+        /* Oculta la columna */
+    }
+
+    .visible-column {
+        display: table-cell;
+        /* Hace que la columna sea visible */
+    }
+
+    /*ELIMINAR ICONO*/
+
+    .btn-eliminar {
+
+        color: #c63737 !important;
+    }
+
+    /**/
+    /* Clase para ocultar el encabezado de la tabla */
+    .table-header-hidden {
+        display: none;
+    }
+
+    /* Clase para ocultar el contenido de la tabla */
+    .table-content-hidden {
+        display: none;
+    }
+
+    /**/
+    /* Clase para ocultar el encabezado de la tabla */
+    .table-header-hidden {
+        display: none;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    /* Clase para ocultar el contenido de la tabla */
+    .table-content-hidden {
+        display: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+
+    /*ESTILOS DE TABLA*/
+</style>
+<mat-card class="cardCrudDashboard" style="margin: 0 !important;padding: 0 !important;">
+    <!--
+    <mat-card-header class="headerCard">
+        <h1> <strong>LISTA DE EQUIPOS</strong> </h1>
+    </mat-card-header>
+    -->
+    <div class="text-end" style="padding: 10px !important;">
+        <button mat-raised-button (click)="clearFilters()" color="warn">
+            <i class="fa-solid fa-filter-circle-xmark"></i>&nbsp;LIMPIAR FILTROS
+        </button>
+    </div>
+    <mat-card-content class="text-center  card-container-crud" style="margin: 0 !important;padding: 0 !important;">
+        <div class="containerTableMarcas container-scroll">
+            <table class="table-responsive crudMarcas mt-3" mat-table [dataSource]="dataSource"
+                style="width: 80% !important;">
+
+                <ng-container matColumnDef="detalle_id">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'" style="display: none !important;">
+                        DETALLE_ID
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'"
+                        style="display: none !important;">
+                        {{element.detalle_id}}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="orden_n">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'" style="display: none !important;">
+                        COTIZACIÓN N°
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'"
+                        style="display: none !important;">
+                        {{element.orden_n}}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="equipo_referencia">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'" style="display: none;">
+                        EQUIPO REFERENCIA
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'" style="display: none;">
+                        {{element.equipo_referencia | uppercase}}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="nombre_equipo">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'">
+                        <mat-form-field class="example-form-field mt-2">
+                            <input matInput type="text" [formControl]="nombre_equipo" placeholder="Nombre de Equipo">
+                            <button matSuffix mat-icon-button aria-label="Clear" (click)="clearFilterNombreEquipo()">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-form-field>
+
+                        NOMBRE DE EQUIPO
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'">
+                        {{element.nombre_equipo | uppercase}}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="descripcion_equipo">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'" style="display: none !important;">
+                        DESCRIPCIÓN DEL EQUIPO
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'"
+                        style="display: none !important;">
+                        {{element.descripcion_equipo | uppercase}}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="tipo_compra">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'">
+                        <mat-form-field class="example-form-field mt-2">
+                            <input matInput type="text" [formControl]="tipo_compra" placeholder="Tipo de Cotización">
+                            <button matSuffix mat-icon-button aria-label="Clear" (click)="clearFilterTipoCompra()">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-form-field>
+                        TIPO DE COTIZACIÓN
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'">
+                        {{element.tipo_compra | uppercase}}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="numero_equipos">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'">
+                        NÚMERO DE EQUIPOS
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'">
+                        {{ element.tipo_compra === 'Apoyo Tecnológico' ? "NO APLICA" : element.numero_equipos }}
+
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="numero_dias">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'">
+                        CANTIDAD DE DÍAS
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'">
+                        {{ element.tipo_compra === 'Comprar' ? "NO APLICA" : element.numero_dias }}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="cantidad_muestras">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'">
+                        CANTIDAD DE MUESTRAS
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'">
+                        {{ element.tipo_compra === 'Comprar' ? "NO APLICA" : element.cantidad_muestras }}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="precio_compra">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'"
+                        [ngClass]="{'table-header': true, 'table-header-hidden': origenPaginaVisita !== 'Dashboard' }">
+                        PRECIO DE COMPRA
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'"
+                        [ngClass]="{'table-content': true, 'table-header-hidden': origenPaginaVisita !== 'Dashboard' }">
+                        {{ element.tipo_compra === 'Apoyo Tecnológico' ? "NO APLICA" : element.precio_compra }}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="precio_dato">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'"
+                        [ngClass]="{'table-header': true, 'table-header-hidden': origenPaginaVisita !== 'Dashboard' }">
+                        PRECIO DATO
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'"
+                        [ngClass]="{'table-content': true, 'table-header-hidden': origenPaginaVisita !== 'Dashboard' }">
+                        {{ element.tipo_compra === 'Comprar' ? "NO APLICA" : element.precio_dato }}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="porcentajeDescuento">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'"
+                        [ngClass]="{'table-header': true, 'table-header-hidden': origenPaginaVisita !== 'Dashboard' }">
+                        <mat-form-field class="example-form-field mt-2">
+                            <input matInput type="text" [formControl]="porcentajeDescuento" placeholder="Descuento">
+                            <button matSuffix mat-icon-button aria-label="Clear"
+                                (click)="clearFilterPorcentajeDescuento()">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-form-field>
+                        DESCUENTO
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'"
+                        [ngClass]="{'table-content': true, 'table-header-hidden': origenPaginaVisita !== 'Dashboard' }">
+                        {{element.porcentajeDescuento}} %
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="estado">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'" style="display: none !important;">
+                        ESTADO
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'"
+                        style="display: none !important;">
+                        {{ element.estado.startsWith('A') ? 'ACTIVO' : (element.estado === 'AG' ? 'MODIFICADO POR INTERNO' : (element.estado === 'I' ? 'INACTIVO' : 'OTRO ESTADO')) }} </td>
+                </ng-container>
+                <ng-container matColumnDef="editar">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'"
+                        [ngClass]="{'table-header': true, 'table-header-hidden':  this.ordenModel.estado_orden === 'FINALIZADO' }">
+                        EDITAR
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'"
+                        [ngClass]="{'table-content': true, 'table-header-hidden':  this.ordenModel.estado_orden === 'FINALIZADO' }">
+                        <button class="btn-editar" mat-stroked-button
+                            extended>
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            EDITAR
+                        </button>
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="eliminar">
+                    <th mat-header-cell *matHeaderCellDef 
+                    >
+                        ELIMINAR
+                    </th>
+                    <td mat-cell *matCellDef="let element">
+                        <button class="btn-eliminar"
+                            mat-stroked-button extended>
+                            <i class="fa-solid fa-trash-can"></i>
+                            Eliminar
+                        </button>
+                    </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" class="row-header"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="row-content-table"></tr>
+            </table>
+            <mat-paginator class="mt-3 paginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+        </div>
+
+
+    </mat-card-content>
+</mat-card>

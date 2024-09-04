@@ -1,0 +1,98 @@
+<style>
+    .mat-dialog-container {
+        z-index: 100000000 !important;
+        /* High z-index to overlay everything */
+    }
+
+    /*tipo de mensaje informativo*/
+    .info {
+        background: #b3e5fc;
+        border: 1px solid #03a9f4;
+        border-top-width: 1px;
+        border-right-width: 1px;
+        border-bottom-width: 1px;
+        border-left-width: 1px;
+        border-width: 0 0 0 6px;
+    }
+
+
+    .info strong {
+        color: #01579b;
+    }
+
+    /*tipo de mensaje EXITO*/
+    .success {
+        background: #c8e6c9;
+        border: 1px solid #256029;
+        border-top-width: 1px;
+        border-right-width: 1px;
+        border-bottom-width: 1px;
+        border-left-width: 1px;
+        border-width: 0 0 0 6px;
+    }
+
+
+    .success strong {
+        color: #256029;
+    }
+
+    /*tipo de mensaje ALERT*/
+
+    .alert {
+        background: #feedaf;
+        border: 1px solid #8a5340;
+        border-top-width: 1px;
+        border-right-width: 1px;
+        border-bottom-width: 1px;
+        border-left-width: 1px;
+        border-width: 0 0 0 6px;
+    }
+
+
+    .alert strong {
+        color: #8a5340;
+    }
+
+    /*tipo de mensaje ERROR*/
+
+    .error {
+        background: #ffcdd2;
+        border: 1px solid #c63737;
+        border-top-width: 1px;
+        border-right-width: 1px;
+        border-bottom-width: 1px;
+        border-left-width: 1px;
+        border-width: 0 0 0 6px;
+    }
+
+
+    .error strong {
+        color: #c63737;
+    }
+
+    .first-modal-backdrop {
+        background: transparent !important;
+    }
+
+    .dialog strong {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        align-content: center;
+        gap: 10px;
+    }
+
+    .dialog strong i {
+        font-size: 1.8rem !important
+    }
+</style>
+
+
+<div mat-dialog-content class="dialog" [ngClass]="data.tipo">
+    <strong>
+        <mat-icon>{{ data.icon }}</mat-icon>
+        <span style="font-size: 13px;">
+            {{ data.mensaje }}
+        </span>
+    </strong>
+</div>

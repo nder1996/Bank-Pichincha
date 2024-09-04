@@ -20,8 +20,8 @@ public class TipoMovimientoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idTipoMovimientos")
-    private String idTipoMovimientos;
+    @Column(name = "idTipoMovimiento")
+    private Integer idTipoMovimientos;
 
     @Column(name = "nombre", nullable = false)
     private String nombre;

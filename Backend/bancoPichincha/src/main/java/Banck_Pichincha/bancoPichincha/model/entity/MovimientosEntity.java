@@ -30,8 +30,15 @@ public class MovimientosEntity {
     @JoinColumn(name = "idTipoMovimientos", nullable = false)
     private TipoMovimientoEntity idTipoMovimientos;
 
+    @ManyToOne
+    @JoinColumn(name = "idCuenta", nullable = false)
+    private CuentaEntity idCuenta;
+
     @Column(name = "valor",nullable = false)
     private Double valor;
+
+    @Column(name = "estado",nullable = false)
+    private String estado;
 
     @Column(name = "saldo",nullable = false)
     private Double saldo;

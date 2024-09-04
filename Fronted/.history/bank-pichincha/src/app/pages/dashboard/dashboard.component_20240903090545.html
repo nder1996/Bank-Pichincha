@@ -1,0 +1,40 @@
+<style>
+    .example-container {
+        width: 100%;
+        height: 90vh;
+        border: 1px solid rgba(0, 0, 0, 0.5);
+    }
+
+    .example-sidenav-content {
+        display: flex;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .example-sidenav {
+        padding: 20px;
+    }
+</style>
+<mat-toolbar>
+    <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
+        <img src="/assets/img/logo-pichincha.png" alt=""
+            style="width: 130px;height: 130x;object-fit: contain;margin: 0 !important;padding: 0 !important;">
+    </button>
+</mat-toolbar>
+<mat-drawer-container class="example-container" autosize>
+    <mat-drawer #drawer class="example-sidenav" mode="side" opened>
+
+        
+        <mat-list-item class="item-dashaboard"><i class="fa-regular fa-pen-to-square"></i>
+            Gestión de Cotizaciones
+        </mat-list-item>
+        <mat-divider class="mb-4"></mat-divider>
+        <mat-list-item class="item-dashaboard"><i class="fa-regular fa-pen-to-square"></i>
+            Gestión de Cotizaciones
+        </mat-list-item>
+    </mat-drawer>
+    <div class="example-sidenav-content">
+
+    </div>
+</mat-drawer-container>

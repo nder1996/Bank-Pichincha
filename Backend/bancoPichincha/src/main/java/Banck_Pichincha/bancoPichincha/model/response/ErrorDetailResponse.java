@@ -34,7 +34,14 @@ public class ErrorDetailResponse {
             new ErrorDetailResponse(400, "ACCOUNT_DELETION_FAILED", "No se pudo borrar la cuenta. Por favor, verifica los datos e inténtalo de nuevo."),
             new ErrorDetailResponse(404, "USER_NOT_FOUND", "El usuario no existe. Por favor, verifica el identificador proporcionado e inténtalo de nuevo."),
             new ErrorDetailResponse(404, "NO_DATA_FOUND", "No se encontraron datos para la solicitud realizada. Por favor, verifica los parámetros e inténtalo de nuevo."),
-            new ErrorDetailResponse(400, "ACCOUNT_SEARCH_FAILED", "Hubo un error al buscar la cuenta. Por favor, verifica los datos proporcionados e inténtalo de nuevo.")
+            new ErrorDetailResponse(400, "ACCOUNT_SEARCH_FAILED", "Hubo un error al buscar la cuenta. Por favor, verifica los datos proporcionados e inténtalo de nuevo."),
+            new ErrorDetailResponse(400, "MOVEMENT_NOT_CREATED", "Hubo un error al crear el nuevo movimiento. Por favor, verifica los datos proporcionados e inténtalo de nuevo."),
+            new ErrorDetailResponse(400, "BANK_MOVEMENT_NOT_UPDATED", "Hubo un error al actualizar el movimiento bancario. Por favor, verifica los datos proporcionados e inténtalo de nuevo."),
+            new ErrorDetailResponse(400, "MOVEMENT_NOT_FOUND", "Hubo un error al buscar el movimiento. Por favor, verifica los datos proporcionados e inténtalo de nuevo."),
+            new ErrorDetailResponse(400, "MOVEMENTS_NOT_FOUND", "Hubo un error al buscar todos los movimientos."),
+            new ErrorDetailResponse(400, "MOVEMENT_NOT_DELETED", "Hubo un error al eliminar el movimiento. Por favor, verifica los datos proporcionados e inténtalo de nuevo.")
+
+
 
 
 

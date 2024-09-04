@@ -1,0 +1,63 @@
+<style>
+    .example-container {
+        width: 100%;
+        height: 90vh;
+        border: 1px solid rgba(0, 0, 0, 0.5);
+    }
+
+    .example-sidenav-content {
+        display: flex;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .example-sidenav {
+        padding: 20px;
+    }
+
+    .item-dashaboard {
+        height: 100% !important;
+        margin: 10px 0 10px 0;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        align-content: center !important;
+        cursor: pointer !important;
+    }
+
+
+
+
+</style>
+<mat-toolbar>
+    <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
+        <img src="/assets/img/logo-pichincha.png" alt=""
+            style="width: 130px;height: 130x;object-fit: contain;margin: 0 !important;padding: 0 !important;">
+    </button>
+</mat-toolbar>
+<mat-drawer-container class="example-container" autosize>
+    <mat-drawer #drawer class="example-sidenav" mode="side" opened>
+
+        <mat-divider></mat-divider>
+
+        <mat-list-item (click)=" moduloMovimiento()" class="item-dashaboard" class="item-dashaboard"><i class="fa-regular fa-pen-to-square"></i>
+            Movimientos
+        </mat-list-item>
+        <mat-divider class="mb-4"></mat-divider>
+        <mat-list-item (click)="moduloCliente()" class="item-dashaboard"><i class="fa-regular fa-pen-to-square"></i>
+           Clientes
+        </mat-list-item>
+        <mat-divider class="mb-4"></mat-divider>
+        <mat-list-item (click)="moduloCuenta()" class="item-dashaboard"><i class="fa-regular fa-pen-to-square"></i>
+            Cuentas
+         </mat-list-item>
+         <mat-divider class="mb-4"></mat-divider>
+    </mat-drawer>
+    <div class="example-sidenav-content">
+        <div class="container-fluid" style="height: 97vh !important;padding: 1rem !important;">
+            <br>  
+            <router-outlet></router-outlet>
+        </div>
+    </div>
+</mat-drawer-container>

@@ -1,0 +1,265 @@
+<style>
+    .card-principal {
+        width: 100% !important;
+        margin: 10px !important;
+        padding: 0 !important;
+        position: relative;
+        right: 11px !important;
+    }
+
+    .card-container-crud {
+      /*  margin: 0 !important;
+        overflow-y: auto;
+        width: 100% !important;
+        padding: 0 !important;*/
+    }
+
+
+
+    .crudMovimiento {
+        width: 100% !important;
+    }
+
+
+
+
+    .titleHeader{
+        text-align: center !important;
+    }
+
+    mat-form-field {
+        margin-top: 10px;
+        width: 95% !important;
+    }
+
+    .card-container-crud .table-header {
+        color: black !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+        height: 20px !important;
+        background-color: rgb(226, 227, 229) !important;
+        color: black !important;
+
+    }
+
+
+    .card-container-crud .table-content {
+        border: 1px solid whitesmoke !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+        padding: 10px !important;
+    }
+
+
+   
+    .card-container-crud .estadoP {
+        margin: auto !important;
+        padding: 4px 5px 4px 5px !important;
+        border: none !important;
+        font-weight: bold;
+        height: 100%;
+        border-radius: 2px;
+    }
+
+
+
+    .card-container-crud .activo {
+        background: #c8e6c9;
+        color: #256029;
+
+    }
+
+    .card-container-crud .inactivo {
+        background: #ffcdd2;
+        color: #c63737;
+    }
+
+    .btn-agregar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+    }
+
+    .contenedor-btn-agregar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+    }
+
+    .contenedor-btn-agregar button {
+        color: #1D3159 !important;
+        border: 1px solid #F2CB05 !important;
+        background-color: #F2CB05 !important;
+        font-weight: bold;
+    }
+
+    .contenedor-btn-filter-eliminar {
+        display: flex;
+        justify-content: end;
+        align-items: center;
+        padding: 1rem;
+    }
+
+    .contenedor-btn-filter-eliminar button {
+        font-weight: bold;
+        color: rgb(37, 111, 169) !important;
+        border: 1px solid rgb(37, 111, 169)  ;
+    }
+
+    .btn-editar {
+        color: #F2CB05 !important;
+        border: 1px solid #F2CB05 !important;
+    }
+
+    .btn-eliminar {
+        color: #c63737 !important;
+        border: 1px solid #c63737 !important;
+    }
+        
+</style>
+
+
+<mat-card class="card-principal container-fluid mt-5">
+    <mat-card-header class="headerCard d-flex flex-column">
+        <h1 class="text-center" style="text-align: center !important;width: 100% !important"> <strong>LISTA DE
+                MOVIMIENTOS</strong> </h1>
+    </mat-card-header>
+    <mat-card-content class="mt-3 card-container-crud container-fluid">
+        <div class="contenedor-btn-agregar">
+            <button (click)="dialogAgregarMovimiento('Agregar')" mat-stroked-button>
+                Agregar Movimiento
+                <mat-icon>note_add</mat-icon>
+            </button>
+        </div>
+        <div class="contenedor-btn-filter-eliminar">
+            <button (click)="borrarTodosLosFiltros()" class="" mat-stroked-button>
+                Borrar filtros
+                <mat-icon>delete_sweep</mat-icon>
+            </button>
+        </div>
+        <div class="container-fluid" style="overflow-y: auto;margin: 0 !important;">
+            <table class="crudMovimiento container-fluid mt-3" mat-table [dataSource]="dataSource">
+                <ng-container matColumnDef="NÚMERO DE CUENTA">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'" class="titleHeader">
+                        NÚMERO DE CUENTA
+                        <mat-form-field class="example-form-field">
+                            <input matInput type="text"  [formControl]="cuenta" >
+                            <button (click)="clearFilterCuenta()" matSuffix mat-icon-button aria-label="Clear">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'">
+                        {{element.cuenta}}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="TIPO DE CUENTA">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'" class="titleHeader">
+                        TIPO DE CUENTA
+                        <mat-form-field class="example-form-field">
+                            <input  [formControl]="tipoCuenta" matInput type="text">
+                            <button  (click)="clearFilterTipoCuenta()"  matSuffix mat-icon-button aria-label="Clear">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'">
+                        {{element.tipoCuenta}}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="SALDO INICIAL">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'" class="titleHeader">
+                        SALDO INICIAL
+                        <mat-form-field class="example-form-field">
+                            <input  [formControl]="saldo" matInput type="text">
+                            <button (click)="clearFilterSaldo()"  matSuffix mat-icon-button aria-label="Clear">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'">
+                        {{element.saldo}}
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="VALOR" style="display: none !important;">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'" class="titleHeader">
+                        VALOR
+                        <mat-form-field class="example-form-field">
+                            <input [formControl]="valor"  matInput type="text">
+                            <button (click)="clearFilterValor()" matSuffix mat-icon-button aria-label="Clear">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'">
+                        {{element.valor}}
+                    </td>
+                </ng-container>
+            
+                <ng-container matColumnDef="ESTADO">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'" class="titleHeader">
+                        ESTADO
+                        <mat-form-field class="example-form-field">
+                            <input [formControl]="estado"  matInput type="text">
+                            <button  (click)="clearFilterEstado()"  matSuffix mat-icon-button aria-label="Clear">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'">
+                        <small class="estadoP text-center"
+                            [ngClass]="['table-content', element.estado === 'TRUE' ? 'activo' : 'inactivo']">
+                            {{ element.estado === 'TRUE' ? 'ACTIVO' : 'FALSE' }}
+                        </small>
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="MOVIMIENTO">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'" class="titleHeader">
+                        MOVIMIENTO
+                        <mat-form-field class="example-form-field">
+                            <input matInput type="text"  [formControl]="tipoMovimiento">
+                            <button  (click)="clearFilterTipoMovimiento()"  matSuffix mat-icon-button aria-label="Clear">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'">
+                        {{element.tipoMovimiento}}
+                    </td>
+                </ng-container>
+            
+            
+                <ng-container matColumnDef="EDITAR">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'" class="titleHeader">
+                        EDITAR
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'">
+                        <button (click)="borrarTodosLosFiltros()" class="btn-editar" mat-stroked-button>
+                            <mat-icon>edit</mat-icon>
+                            EDITAR
+                        </button>
+                    </td>
+                </ng-container>
+            
+                <ng-container matColumnDef="ELIMINAR">
+                    <th mat-header-cell *matHeaderCellDef [ngClass]="'table-header'" class="titleHeader">
+                        ELIMINAR
+                    </th>
+                    <td mat-cell *matCellDef="let element" [ngClass]="'table-content'">
+                        <button (click)="deleteByMovimiento(element.idMovimientos)" class="btn-eliminar" mat-stroked-button>
+                            <mat-icon>delete icon</mat-icon>
+                            ELIMINAR
+                        </button>
+                    </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+        </div>
+        
+
+        <mat-paginator class="mt-3 paginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+    </mat-card-content>
+</mat-card>

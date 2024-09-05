@@ -17,9 +17,14 @@
         </div>
         <div class="col-12">
           <label>TIPO DE MOVIMIENTO</label>
-          <mat-form-field class="example-form-field">
-            <input matInput type="text">
-          </mat-form-field>
+            <mat-form-field class="example-form-field">
+              <mat-label>TIPO DE MOVIMIENTO</mat-label>
+              <mat-select [(value)]="selectedTipoMovimiento" errorStateMatcher="matcher">
+                <mat-option *ngFor="let tipo of listTipoMovimientos" [value]="tipo.idTipoMovimientos">
+                  {{ tipo.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
         </div>
         <div class="col-12">
           <label>VALOR DEL MOVIMIENTO</label>

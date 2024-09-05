@@ -301,7 +301,8 @@ export class dialogOpciones {
     private movimientoService: MovimientoService) { }
 
   public movimiento: EventEmitter<MovimientoModel> = new EventEmitter<MovimientoModel>();
-  private subscription!: Subscription;
+  private subscription!: Subscription; 
+  public listTipoMovimientos = [] = [];
 
 
   public saveMovimiento(movimiento: MovimientoModel) {
@@ -309,6 +310,22 @@ export class dialogOpciones {
       .subscribe(
         (response: any) => {
          // this.listMovimiento = response.data.Movimientos;
+          ///this.dataSource.data = this.listMovimiento;
+        },
+        (error) => {
+          //console.error('Error al obtener movimientos', error);
+        }
+      );
+  }
+
+
+  
+  public getAllTipoMovimiento() {
+    this.listTipoMovimientos = []
+    this.subscription = this.movimientoService.getAllMovimientos()
+      .subscribe(
+        (response: any) => {
+          this.listTipoMovimientos = response.data.tipoMovimiento;
           ///this.dataSource.data = this.listMovimiento;
         },
         (error) => {

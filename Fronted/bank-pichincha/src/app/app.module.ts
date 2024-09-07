@@ -31,7 +31,7 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
 import { MatDialog } from '@angular/material/dialog';
 import { ReactiveFormsModule } from '@angular/forms';
-import { LocationStrategy, HashLocationStrategy } from '@angular/common';
+import { LocationStrategy, HashLocationStrategy, DecimalPipe } from '@angular/common';
 import { InterruptorLoadingService } from 'src/services/interruptor-loading.service';
 
 @NgModule({
@@ -62,7 +62,8 @@ import { InterruptorLoadingService } from 'src/services/interruptor-loading.serv
     provide: HTTP_INTERCEPTORS,
     useClass: InterruptorLoadingService,
     multi: true
-  }
+  },
+  DecimalPipe
     
 ],
   bootstrap: [AppComponent]

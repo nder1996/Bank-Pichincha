@@ -1,14 +1,13 @@
 import { ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MovimientoService } from 'src/services/movimiento.service';
-import { LoadingComponent } from '../loading/loading.component';
 import { LoadingService } from 'src/services/loading.service';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatSort } from '@angular/material/sort';
-import { MovimientoModel, MovimientoResponse } from 'src/model/movimiento-model';
+import { MovimientoModel } from 'src/model/movimiento-model';
 import { MatTableDataSource } from '@angular/material/table';
-import { CommonModule } from '@angular/common';
-import { AbstractControl, FormBuilder, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule, DecimalPipe, formatCurrency } from '@angular/common';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -19,6 +18,9 @@ import { MatSliderModule } from '@angular/material/slider';
 import { Router } from '@angular/router';
 import { NotificacionService } from 'src/services/notificacion.service';
 import { Subscription } from 'rxjs';
+import { TipoMovimiento } from 'src/model/tipo-movimiento.model';
+import { PrecioFormatService } from 'src/services/precio-format.service';
+import { ApiResponse } from 'src/model/api-response.model';
 
 @Component({
   selector: 'app-crud-movimiento',
@@ -30,7 +32,7 @@ export class CrudMovimientoComponent implements OnInit, OnDestroy {
 
 
   displayedColumns: string[] = ['NÚMERO DE CUENTA', 'TIPO DE CUENTA', 'SALDO INICIAL', 'ESTADO', 'VALOR', 'MOVIMIENTO', 'EDITAR', 'ELIMINAR'];
-  @Input() dataSource = new MatTableDataSource<MovimientoModel>();
+  @Input() dataSource = new MatTableDataSource<any>();
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   // @Input() dataSource = new MatTableDataSource<CrudOrdenesCotizacionesDetallesEquiposModel>();
@@ -38,10 +40,10 @@ export class CrudMovimientoComponent implements OnInit, OnDestroy {
 
   constructor(private dialog: MatDialog, private notificacionService: NotificacionService,
     private movimientoService: MovimientoService, private cdr: ChangeDetectorRef,
-    private loadingService: LoadingService) { }
+    private loadingService: LoadingService, private fb: FormBuilder) { }
 
   private subscription!: Subscription;
-  public listMovimiento: MovimientoModel[] = [];
+  public listMovimiento: any[]=[];
   public movimiento: MovimientoModel = new MovimientoModel();
 
 
@@ -70,11 +72,10 @@ export class CrudMovimientoComponent implements OnInit, OnDestroy {
 
 
   updateTableMovimientos() {
-    // Asumamos que tienes un método para obtener los datos de la tabla
     this.getAllMovimiento();
-
     this.dataSource.data = [];
-    this.dataSource.data = this.listMovimiento; // Lista de datos que has cargado
+    this.dataSource.data =this.listMovimiento;
+    console.log("movimiento : "+JSON.stringify(this.listMovimiento))
 
     this.dataSource.filterPredicate = (data, filter): boolean => {
       const filterObject = JSON.parse(filter);
@@ -189,7 +190,6 @@ export class CrudMovimientoComponent implements OnInit, OnDestroy {
       .subscribe(
         (response: any) => {
           this.listMovimiento = response.data.Movimientos;
-          ///this.dataSource.data = this.listMovimiento;
         },
         (error) => {
           //console.error('Error al obtener movimientos', error);
@@ -203,12 +203,15 @@ export class CrudMovimientoComponent implements OnInit, OnDestroy {
   public getAllMovimiento() {
     this.subscription = this.movimientoService.getAllMovimientos()
       .subscribe(
-        (response: any) => {
-          this.listMovimiento = response.data.Movimientos;
-          this.dataSource.data = this.listMovimiento;
+        (response:any) => {
+          if(response &&  response.data && response.data.Movimientos){
+            this.listMovimiento = response.data.Movimientos;
+            this.dataSource.data = response.data.Movimientos;
+          }
+         // console.log('LISTA DE MOVIMIENTOS : '+JSON.stringify( this.listMovimiento ));
         },
         (error) => {
-          //console.error('Error al obtener movimientos', error);
+          this.notificacionService.openDialog('error', 'error_outline', error.details);
         }
       );
   }
@@ -219,10 +222,9 @@ export class CrudMovimientoComponent implements OnInit, OnDestroy {
       .subscribe(
         (response: any) => {
           this.movimiento = response.data.movimiento;
-          //this.dataSource.data = this.listMovimiento;
         },
         (error) => {
-          //console.error('Error al obtener movimientos', error);
+          this.notificacionService.openDialog('error', 'error_outline', error.details);
         }
       );
   }
@@ -237,7 +239,7 @@ export class CrudMovimientoComponent implements OnInit, OnDestroy {
           this.getAllMovimiento();
         },
         (error) => {
-          this.notificacionService.openDialog('info', 'info', error);
+          this.notificacionService.openDialog('error', 'error_outline', error.details);
         }
       );
   }
@@ -246,12 +248,14 @@ export class CrudMovimientoComponent implements OnInit, OnDestroy {
 
 
   dialogAgregarMovimiento(tipoModal: string) {
+
     const dialogRef = this.dialog.open(dialogOpciones, {
       width: '500px',
-      disableClose: false
+      disableClose: false,
+      data: { movimiento: this.listMovimiento, tipoModal: tipoModal }
     });
 
-    dialogRef.componentInstance.movimiento.subscribe((movimiento: MovimientoModel[]) => {
+    dialogRef.componentInstance.movimiento.subscribe((movimiento: MovimientoModel) => {
       this.dataSource.data = [];
       // this.dataSource.data.push(movimiento);
       this.dataSource.paginator = this.paginator;
@@ -295,43 +299,136 @@ export class CrudMovimientoComponent implements OnInit, OnDestroy {
   encapsulation: ViewEncapsulation.None,
 })
 export class dialogOpciones {
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { listaMovimiento: MovimientoModel[] },
-    private formBuilder: FormBuilder, private dialogRef: MatDialogRef<dialogOpciones>,
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { movimiento: MovimientoModel[], tipoModal: string },
+    private fb: FormBuilder, private dialogRef: MatDialogRef<dialogOpciones>,
     private notificacionService: NotificacionService, private router: Router,
-    private movimientoService: MovimientoService) { }
+    private movimientoService: MovimientoService, private cdr: ChangeDetectorRef, private decimalPipe: DecimalPipe,
+    private monedaService: PrecioFormatService) { }
 
   public movimiento: EventEmitter<MovimientoModel> = new EventEmitter<MovimientoModel>();
-  private subscription!: Subscription; 
-  public listTipoMovimientos = [] = [];
+  private subscription!: Subscription;
+  public ListTipoMovimiento: TipoMovimiento[] = [];
+  public listTodosMovimiento: MovimientoModel[] = [];
+  public formMovimiento!: FormGroup;
+  public movimientoSave: MovimientoModel = new MovimientoModel();
+  public saldoFinal: number = 0.0;
 
 
   public saveMovimiento(movimiento: MovimientoModel) {
     this.subscription = this.movimientoService.saveMovimiento(movimiento)
       .subscribe(
         (response: any) => {
-         // this.listMovimiento = response.data.Movimientos;
-          ///this.dataSource.data = this.listMovimiento;
+          if(response.Movimiento=="Movimiento Creado"){
+            this.notificacionService.openDialog('success', 'check_circle', response.Movimiento);
+          }else{
+            this.notificacionService.openDialog('error', 'error_outline', response.error.details);
+          }
         },
         (error) => {
-          //console.error('Error al obtener movimientos', error);
+          this.notificacionService.openDialog('error', 'error_outline', error.details);
         }
       );
   }
 
 
-  
+
   public getAllTipoMovimiento() {
-    this.listTipoMovimientos = []
-    this.subscription = this.movimientoService.getAllMovimientos()
+    this.ListTipoMovimiento = []
+    this.subscription = this.movimientoService.getAllTipoMovimiento()
       .subscribe(
         (response: any) => {
-          this.listTipoMovimientos = response.data.tipoMovimiento;
-          ///this.dataSource.data = this.listMovimiento;
+          this.ListTipoMovimiento = response.data.tipoMovimiento;
         },
         (error) => {
-          //console.error('Error al obtener movimientos', error);
+          this.notificacionService.openDialog('error', 'error_outline', error.details);
         }
       );
   }
+
+
+  ngOnInit() {
+    this.formMovimiento = this.fb.group({
+      numeroCuenta: [null, Validators.required],
+      tipoMovimiento: [null, Validators.required],
+      valorMovimiento: [null, [Validators.required, Validators.pattern('^[0-9]*$')]],
+      saldo: [{ value: '', disabled: true }, Validators.required]
+    });
+  }
+
+
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.getAllTipoMovimiento();
+      this.listTodosMovimiento = this.data.movimiento;
+      console.log(JSON.stringify(this.listTodosMovimiento))
+      this.formatSaldoCuenta();
+      this.cdr.detectChanges();
+    }, 100);
+  }
+
+
+
+
+  private formatSaldoCuenta() {
+    this.formMovimiento.get('numeroCuenta')?.valueChanges.subscribe(
+      (idCuenta: any) => {
+        this.listTodosMovimiento.forEach(movimiento => {
+          if (movimiento.idMovimientos == idCuenta) {
+            const saldo_cuenta = movimiento.saldo ?? 0.0;
+            this.formMovimiento.patchValue({
+              saldo: this.monedaService.formatoUSD(saldo_cuenta.toString()),
+            });
+          }
+        })
+      }
+    );
+  }
+
+  //this.dialogService.openDialog('alert', 'warning', 'Este es un mensaje de notificación.'); //alert
+
+
+
+  public movimientoBancarioRespuesta() {
+    const saldo: number = parseFloat(this.formMovimiento.get('saldo')?.value.replace(/[^0-9.-]/g, ''));
+    const idTipoMovimiento: number = this.formMovimiento.get('tipoMovimiento')?.value ?? -1;
+    if (saldo && idTipoMovimiento!=-1) {
+      const valorMovimiento = +this.formMovimiento.get('valorMovimiento')?.value.replace(/[^0-9.-]/g, '');
+      this.ListTipoMovimiento.forEach(tipoMovimiento => {
+        if (tipoMovimiento.idTipoMovimientos == idTipoMovimiento) {
+          if (tipoMovimiento.nombre == 'RETIRO') {
+            if (saldo < valorMovimiento) {
+              this.notificacionService.openDialog('alert', 'warning', 'No se puede completar el retiro porque la cuenta no tiene suficiente saldo.');
+              this.formMovimiento.patchValue({
+                valorMovimiento: '',
+              });
+            } else {
+              this.saldoFinal = saldo - valorMovimiento;
+            }
+          }
+        }
+      })
+    } else {
+      this.notificacionService.openDialog('alert', 'warning', 'Asegúrate de tener saldo suficiente y de haber seleccionado un tipo de movimiento.');
+      this.formMovimiento.patchValue({
+        valorMovimiento: '',
+      });
+    }
+  }
+
+
+  guardarMovimiento() {
+  //  alert('ola mundo')
+    if (this.formMovimiento.valid) {
+      this.movimientoSave.fecha = new Date();
+      this.movimientoSave.idTipoMovimiento =  this.formMovimiento.get('tipoMovimiento')?.value;
+      this.movimientoSave.numCuenta =  this.formMovimiento.get('numeroCuenta')?.value;
+      this.movimientoSave.saldo = this.saldoFinal;
+      this.movimientoSave.valor = this.formMovimiento.get('valorMovimiento')?.value;
+      this.movimientoSave.estado = 'TRUE';
+      console.log("data movmiento : "+JSON.stringify((this.movimientoSave)))
+      this.saveMovimiento(this.movimientoSave);
+    }
+  }
+
 
 }

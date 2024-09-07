@@ -43,4 +43,15 @@ public interface MovimientosRepository extends JpaRepository<MovimientosEntity, 
 
 
 
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO Movimientos (idCuenta, idTipoMovimientos, valor, saldo, fecha, estado, create_at) " +
+            "VALUES (:#{#movimientoDto.numCuenta}, :#{#movimientoDto.idTipoMovimiento}, :#{#movimientoDto.valor}, " +
+            ":#{#movimientoDto.saldo}, :#{#movimientoDto.fecha}, 'TRUE', NOW())", nativeQuery = true)
+    Integer insert(@Param("movimientoDto") MovimientoDto movimientoDto);
+
+
+
+
+
 }

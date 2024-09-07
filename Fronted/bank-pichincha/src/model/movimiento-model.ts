@@ -1,56 +1,28 @@
 export class MovimientoModel {
   idMovimientos?: number;
-  idCuenta?: number;
-  cuenta?: string;
-  idTipoCuenta?: number;
-  tipoCuenta?: string;
+  numCuenta?: number;
   fecha?: Date;
-  idTiposMovimientos?: number;
-  tipoMovimiento?: string;
+  idTipoMovimiento?: number;
   valor?: number;
   saldo?: number;
   estado?: string;
-  createAt?: Date;
-  updateAt?: Date;
 
   constructor(
     idMovimientos?: number,
-    idCuenta?: number,
-    cuenta?: string,
-    idTipoCuenta?: number,
-    tipoCuenta?: string,
-    fecha?: Date,
-    idTiposMovimientos?: number,
-    tipoMovimiento?: string,
+    numCuenta?: number,
+    idTipoMovimiento?: number,
     valor?: number,
+    fecha?: Date,
     saldo?: number,
     estado?: string,
-    createAt?: Date,
-    updateAt?: Date
   ) {
     this.idMovimientos = idMovimientos;
-    this.idCuenta = idCuenta;
-    this.cuenta = cuenta;
-    this.idTipoCuenta = idTipoCuenta;
-    this.tipoCuenta = tipoCuenta;
+    this.numCuenta = numCuenta;
     this.fecha = fecha;
-    this.idTiposMovimientos = idTiposMovimientos;
-    this.tipoMovimiento = tipoMovimiento;
+    this.idTipoMovimiento = idTipoMovimiento;
     this.valor = valor;
     this.saldo = saldo;
+    this.fecha = fecha;
     this.estado = estado;
-    this.createAt = createAt;
-    this.updateAt = updateAt;
   }
-}
-
-export interface MovimientoResponse {
-  data: {
-    Movimientos: MovimientoModel[];
-  };
-  meta: {
-    message: string;
-    status: number;
-  };
-  error: any;
 }

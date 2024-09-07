@@ -16,28 +16,16 @@ public class MovimientoDto {
 
     private Integer idMovimientos;
 
-  //  private Integer idCuenta;
-
-    private String cuenta;
-
-    //private Integer idTipoCuenta;
-
-    private String tipoCuenta;
+    private String numCuenta;
 
     private Date fecha;
 
-    //private Integer IdTiposMovimientos;
-
-    private String tipoMovimiento;
+    private String idTipoMovimiento;
 
     private Double valor;
 
     private Double saldo;
 
     private String estado;
-
- //   private Date create_at;
-
-  //  private Date update_at;
 
 }

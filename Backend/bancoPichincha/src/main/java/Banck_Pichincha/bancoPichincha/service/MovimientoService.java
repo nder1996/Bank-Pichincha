@@ -37,25 +37,25 @@ public class MovimientoService implements IMovimientoService{
 
     @Override
     public ApiResponse<String> save(MovimientoDto movimiento) {
-        MovimientosEntity  movimientosEntity = new MovimientosEntity();
         try {
-            MovimientosEntity  finbyMovimiento = movimientosRepository.getByIdMovimientos(movimientosEntity.getIdMovimientos());
-            if(finbyMovimiento!=null && finbyMovimiento.getIdCuenta()!=null){
-                movimientosEntity.setIdTipoMovimientos(finbyMovimiento.getIdTipoMovimientos());
-                movimientosEntity.setIdCuenta(finbyMovimiento.getIdCuenta());
-                movimientosEntity.setFecha(movimiento.getFecha());
-                movimientosEntity.setValor(movimiento.getValor());
-                movimientosEntity.setEstado(movimiento.getEstado());
-                movimientosEntity.setSaldo(movimiento.getSaldo());
-                movimientosEntity.setCreate_at(new Date());
-                MovimientosEntity save = movimientosRepository.save(movimientosEntity);
-                if(save!=null && save.getIdMovimientos()!=null){
-                    return responseApiBuilder.successRespuesta("Movimiento Creado","Movimiento");
+            if(this.esMovimientoValido(movimiento)){
+                if(movimiento.getSaldo()>= movimiento.getValor() ){
+                    CuentaEntity cuenta = this.cuentaRepository.getByIdCuentaxNumCuenta(Integer.valueOf(movimiento.getNumCuenta()));
+                    if(cuenta!=null && cuenta.getIdCuenta()!=null){
+                        Integer save = movimientosRepository.insert(movimiento);
+                        if(save!=null && save>0){
+                            return responseApiBuilder.successRespuesta("Movimiento Creado","Movimiento");
+                        }else{
+                            return this.responseApiBuilder.errorRespuesta("MOVEMENT_NOT_CREATED");
+                        }
+                    }else{
+                        return this.responseApiBuilder.errorRespuesta("MOVEMENT_NOT_CREATED");
+}
                 }else{
                     return this.responseApiBuilder.errorRespuesta("MOVEMENT_NOT_CREATED");
                 }
-            }else{
-                return this.responseApiBuilder.errorRespuesta("MOVEMENT_NOT_CREATED");
+                }else{
+                return this.responseApiBuilder.errorRespuesta("INSUFFICIENT_FUNDS_DEBIT");
             }
         }catch (Exception e) {
             System.err.println("Error al guardar el cliente: " + e.getMessage());
@@ -63,12 +63,13 @@ public class MovimientoService implements IMovimientoService{
         }
     }
 
+
     @Override
     public ApiResponse<String> update(MovimientoDto movimiento) {
         try {
             Integer row =  this.movimientosRepository.updateMoviento(movimiento);
             if(row>0){
-                String creacion = "El Movimiento del número de cuenta  "+movimiento.getCuenta() + " Fueron actualizados con éxito";
+                String creacion = "El Movimiento del número de cuenta  "+movimiento.getNumCuenta() + " Fueron actualizados con éxito";
                 return this.responseApiBuilder.successRespuesta(creacion,"movimiento");
             }else{
                 return this.responseApiBuilder.errorRespuesta("UPDATE_RECORD_ERROR");
@@ -81,33 +82,29 @@ public class MovimientoService implements IMovimientoService{
 
     @Override
     public ApiResponse<String> getByMovimiento(Integer idMovimiento) {
-        MovimientoDto movimientoDto = new MovimientoDto();
+        Map<String, Object> movimientoMap = new HashMap<>();
         try {
             MovimientosEntity movimiento = this.movimientosRepository.getByIdMovimientos(idMovimiento);
-            if(movimiento!=null && movimiento.getIdMovimientos()!=null){
-                movimientoDto.setCuenta(movimiento.getIdCuenta().getNumeroCuenta());
-                //movimientoDto.setIdTipoCuenta(movimiento.getIdCuenta().getTipoCuente().getId());
-                movimientoDto.setTipoCuenta(movimiento.getIdCuenta().getTipoCuente().getNombre());
-               // movimientoDto.setIdTiposMovimientos(movimiento.getIdTipoMovimientos().getIdTipoMovimientos());
-                movimientoDto.setSaldo(movimiento.getSaldo());
-                movimiento.setEstado(movimiento.getEstado());
-                movimiento.setValor(movimiento.getValor());
-                String msg_movimiento = "";
+            if (movimiento != null && movimiento.getIdMovimientos() != null) {
+                movimientoMap.put("numCuenta", movimiento.getIdCuenta().getNumeroCuenta());
+                movimientoMap.put("tipoCuenta", movimiento.getIdCuenta().getTipoCuente().getNombre());
+                movimientoMap.put("saldo", movimiento.getSaldo());
+                movimientoMap.put("estado", movimiento.getEstado());
+                movimientoMap.put("valor", movimiento.getValor());
+                String msgMovimiento = "";
                 DecimalFormat df = new DecimalFormat("#.##");
                 String valorComoString = df.format(movimiento.getValor());
-                if(movimiento.getIdTipoMovimientos().getNombre().equals("RETIRO")){
-                    msg_movimiento = "RETIRO DE "+valorComoString ;
-                    movimientoDto.setTipoMovimiento(msg_movimiento);
-                }  if(movimiento.getIdTipoMovimientos().getNombre().equals("DEPÓSITO")){
-                    msg_movimiento = "DEPÓSITO DE "+valorComoString ;
-                    movimientoDto.setTipoMovimiento(msg_movimiento);
+                if (movimiento.getIdTipoMovimientos().getNombre().equals("RETIRO")) {
+                    msgMovimiento = "RETIRO DE " + valorComoString;
+                } else if (movimiento.getIdTipoMovimientos().getNombre().equals("DEPÓSITO")) {
+                    msgMovimiento = "DEPÓSITO DE " + valorComoString;
                 }
-                return this.responseApiBuilder.successRespuesta(movimientoDto,"MOVIMIENTO");
-            }else{
+                movimientoMap.put("tipoMovimiento", msgMovimiento);
+                return this.responseApiBuilder.successRespuesta(movimientoMap, "MOVIMIENTO");
+            } else {
                 return this.responseApiBuilder.errorRespuesta("ACCOUNT_SEARCH_FAILED");
-
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.err.println("Error al buscar la cuenta: " + e.getMessage());
             return this.responseApiBuilder.errorRespuesta("ACCOUNT_SEARCH_FAILED");
         }
@@ -118,40 +115,38 @@ public class MovimientoService implements IMovimientoService{
         try {
             List<MovimientosEntity> movimientos = this.movimientosRepository.getAllMovimientos();
             if (movimientos != null && !movimientos.isEmpty()) {
-                List<MovimientoDto> movimientoList = movimientos.stream()
+                List<Map<String, Object>> movimientoList = movimientos.stream()
                         .map(movimiento -> {
-                            MovimientoDto movimientoDto = new MovimientoDto();
+                            Map<String, Object> movimientoMap = new HashMap<>();
                             if (movimiento.getIdMovimientos() != null) {
-                                movimientoDto.setIdMovimientos(movimiento.getIdMovimientos());
+                                movimientoMap.put("idMovimientos", movimiento.getIdMovimientos());
                             }
                             if (movimiento.getIdCuenta() != null) {
-                             //   movimientoDto.setIdCuenta(movimiento.getIdCuenta().getIdCuenta());
-                                movimientoDto.setCuenta(movimiento.getIdCuenta().getNumeroCuenta());
-                             //   movimientoDto.setIdTipoCuenta(movimiento.getIdCuenta().getTipoCuente().getId());
-                                movimientoDto.setTipoCuenta(movimiento.getIdCuenta().getTipoCuente().getNombre());
-                            }
-                            if (movimiento.getIdTipoMovimientos() != null) {
-                               /// movimientoDto.setIdTiposMovimientos(movimiento.getIdTipoMovimientos().getIdTipoMovimientos());
+                                movimientoMap.put("numCuenta", movimiento.getIdCuenta().getNumeroCuenta());
+                                movimientoMap.put("tipoCuenta", movimiento.getIdCuenta().getTipoCuente().getNombre());
                             }
                             if (movimiento.getSaldo() != null) {
-                                movimientoDto.setSaldo(movimiento.getSaldo());
+                                movimientoMap.put("saldo", movimiento.getSaldo());
                             }
                             if (movimiento.getValor() != null) {
-                                movimientoDto.setValor(movimiento.getValor());
+                                movimientoMap.put("valor", movimiento.getValor());
                             }
                             if (movimiento.getEstado() != null) {
-                                movimientoDto.setEstado(movimiento.getEstado());
-                            }
-                            // Formatear el mensaje de movimiento
-                            DecimalFormat df = new DecimalFormat("#.##");
-                            String valorComoString = df.format(movimiento.getValor());
-                            if (movimiento.getIdTipoMovimientos().getNombre().equals("RETIRO")) {
-                                movimientoDto.setTipoMovimiento("RETIRO DE " + valorComoString);
-                            } else if (movimiento.getIdTipoMovimientos().getNombre().equals("DEPÓSITO")) {
-                                movimientoDto.setTipoMovimiento("DEPÓSITO DE " + valorComoString);
+                                movimientoMap.put("estado", movimiento.getEstado());
                             }
 
-                            return movimientoDto;
+                            // Formatear el valor
+                            DecimalFormat df = new DecimalFormat("#.##");
+                            String valorComoString = df.format(movimiento.getValor());
+
+                            // Definir el tipo de movimiento
+                            if (movimiento.getIdTipoMovimientos().getNombre().equals("RETIRO")) {
+                                movimientoMap.put("tipoMovimiento", "RETIRO DE " + valorComoString);
+                            } else if (movimiento.getIdTipoMovimientos().getNombre().equals("DEPÓSITO")) {
+                                movimientoMap.put("tipoMovimiento", "DEPÓSITO DE " + valorComoString);
+                            }
+
+                            return movimientoMap;
                         })
                         .collect(Collectors.toList());
 
@@ -197,4 +192,15 @@ public class MovimientoService implements IMovimientoService{
             return this.responseApiBuilder.errorRespuesta("NO_DATA_AVAILABLE");
         }
     }
+
+
+        public boolean esMovimientoValido(MovimientoDto movimiento) {
+            return movimiento != null &&
+                    movimiento.getFecha() != null &&
+                    movimiento.getValor() != null && !movimiento.getValor().toString().trim().isEmpty() &&
+                    movimiento.getEstado() != null && !movimiento.getEstado().trim().isEmpty() &&
+                    movimiento.getSaldo() != null && !movimiento.getSaldo().toString().trim().isEmpty() &&
+                    movimiento.getIdTipoMovimiento() != null && !movimiento.getIdTipoMovimiento().toString().trim().isEmpty();
+        }
+
 }

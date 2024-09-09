@@ -1,16 +1,20 @@
 package Banck_Pichincha.bancoPichincha.service;
 
+
 import Banck_Pichincha.bancoPichincha.model.dto.MovimientoDto;
-import Banck_Pichincha.bancoPichincha.model.entity.ClienteEntity;
 import Banck_Pichincha.bancoPichincha.model.entity.CuentaEntity;
 import Banck_Pichincha.bancoPichincha.model.entity.MovimientosEntity;
 import Banck_Pichincha.bancoPichincha.model.entity.TipoMovimientoEntity;
 import Banck_Pichincha.bancoPichincha.model.response.ApiResponse;
-import Banck_Pichincha.bancoPichincha.repository.*;
+import Banck_Pichincha.bancoPichincha.repository.CuentaRepository;
+import Banck_Pichincha.bancoPichincha.repository.MovimientosRepository;
+import Banck_Pichincha.bancoPichincha.repository.TipoMovimientoRepository;
+import Banck_Pichincha.bancoPichincha.util.ValidationMovimientoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -33,34 +37,67 @@ public class MovimientoService implements IMovimientoService{
     @Autowired
     ResponseApiBuilder responseApiBuilder;
 
+    @Autowired
+    CuentaService cuentaService;
+
+
+    private final ValidationMovimientoUtil movimientoUtil;
+
+    @Autowired
+    public MovimientoService(ValidationMovimientoUtil movimientoUtil) {
+        this.movimientoUtil = movimientoUtil;
+    }
 
 
     @Override
     public ApiResponse<String> save(MovimientoDto movimiento) {
-        try {
-            if(this.esMovimientoValido(movimiento)){
-                if(movimiento.getSaldo()>= movimiento.getValor() ){
-                    CuentaEntity cuenta = this.cuentaRepository.getByIdCuentaxNumCuenta(Integer.valueOf(movimiento.getNumCuenta()));
-                    if(cuenta!=null && cuenta.getIdCuenta()!=null){
-                        Integer save = movimientosRepository.insert(movimiento);
-                        if(save!=null && save>0){
-                            return responseApiBuilder.successRespuesta("Movimiento Creado","Movimiento");
-                        }else{
-                            return this.responseApiBuilder.errorRespuesta("MOVEMENT_NOT_CREATED");
-                        }
-                    }else{
-                        return this.responseApiBuilder.errorRespuesta("MOVEMENT_NOT_CREATED");
-}
-                }else{
-                    return this.responseApiBuilder.errorRespuesta("MOVEMENT_NOT_CREATED");
-                }
-                }else{
-                return this.responseApiBuilder.errorRespuesta("INSUFFICIENT_FUNDS_DEBIT");
-            }
-        }catch (Exception e) {
-            System.err.println("Error al guardar el cliente: " + e.getMessage());
-            return this.responseApiBuilder.errorRespuesta("MOVEMENT_NOT_CREATED");
+        // Usando el validador para validar el movimiento
+        if (!this.movimientoUtil.esMovimientoValido(movimiento)) {
+            return responseApiBuilder.errorRespuesta("INVALID_MOVEMENT");
         }
+
+        // Lógica adicional del servicio
+        List<TipoMovimientoEntity> tiposMovimiento = tipoMovimientoRepository.getAllTipoMovimiento();
+        CuentaEntity cuenta = cuentaRepository.getByIdCuentaxNumCuenta(movimiento.getNumCuenta());
+
+        if (cuenta == null && cuenta.getIdCuenta()!=null) {
+            return responseApiBuilder.errorRespuesta("INSUFFICIENT_FUNDS_DEBIT");
+        }
+
+                movimiento.setIdCuenta(cuenta.getIdCuenta());
+
+        for (TipoMovimientoEntity tipoMovimiento : tiposMovimiento) {
+            if (movimiento.getIdTipoMovimiento() == tipoMovimiento.getIdTipoMovimientos()) {
+                if ("RETIRO".equals(tipoMovimiento.getNombre())) {
+                    if (movimiento.getSaldo() < movimiento.getValor()) {
+                        return responseApiBuilder.errorRespuesta("INSUFFICIENT_FUNDS_DEBIT");
+                    }
+                    Object saldoRetiradoHoy = this.movimientosHoyRetiro(cuenta.getNumeroCuenta()).getData().get("total_movimiento_hoy");
+                    Double saldoRetiradoHoyDouble = (saldoRetiradoHoy instanceof Number)
+                            ? ((Number) saldoRetiradoHoy).doubleValue()
+                            : 0.0;
+                    if(movimiento.getValor()<=1000 && saldoRetiradoHoyDouble<=1000){
+                        movimiento.setSaldo(cuenta.getSaldoInicial()- movimiento.getValor());
+                    }else{
+                        return responseApiBuilder.errorRespuesta("DAILY_WITHDRAWAL_LIMIT_EXCEEDED");
+                    }
+                } else if ("DEPÓSITO".equals(tipoMovimiento.getNombre())) {
+                    movimiento.setSaldo(cuenta.getSaldoInicial() + movimiento.getValor());
+                } else {
+                    return responseApiBuilder.errorRespuesta("INVALID_MOVEMENT_TYPE");
+                }
+                cuenta.setSaldoInicial(movimiento.getSaldo());
+                CuentaEntity cuenta1 = this.cuentaRepository.save(cuenta);
+                Integer saveResult = movimientosRepository.insert(movimiento);
+                if (saveResult != null && saveResult > 0 && cuenta1.getIdCuenta() != null) {
+                    return responseApiBuilder.successRespuesta("Movimiento Creado", "Movimiento");
+                } else {
+                    return responseApiBuilder.errorRespuesta("MOVEMENT_NOT_CREATED");
+                }
+            }
+        }
+
+        return responseApiBuilder.errorRespuesta("MOVEMENT_NOT_CREATED");
     }
 
 
@@ -193,14 +230,42 @@ public class MovimientoService implements IMovimientoService{
         }
     }
 
-
-        public boolean esMovimientoValido(MovimientoDto movimiento) {
-            return movimiento != null &&
-                    movimiento.getFecha() != null &&
-                    movimiento.getValor() != null && !movimiento.getValor().toString().trim().isEmpty() &&
-                    movimiento.getEstado() != null && !movimiento.getEstado().trim().isEmpty() &&
-                    movimiento.getSaldo() != null && !movimiento.getSaldo().toString().trim().isEmpty() &&
-                    movimiento.getIdTipoMovimiento() != null && !movimiento.getIdTipoMovimiento().toString().trim().isEmpty();
+    @Override
+    public ApiResponse<String> getAllCuenta() {
+        try {
+            ApiResponse<String> cuenta = this.cuentaService.getAllCuenta();
+            return cuenta;
+        }catch (Exception e) {
+            System.err.println("Error al buscar todas la cuentas: " + e.getMessage());
+            return this.responseApiBuilder.errorRespuesta("NO_DATA_AVAILABLE");
         }
+    }
+
+
+    public ApiResponse<String> movimientosHoyRetiro(String numeroCuenta){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            String fecha_formateada = sdf.format(new Date());
+            double SumaTotal = 0.0;
+            CuentaEntity cuenta = this.cuentaRepository.getByIdCuentaxNumCuenta(numeroCuenta);
+            if(cuenta!=null && cuenta.getIdCuenta()!=null){
+                List<MovimientosEntity> movimientoHoy = this.movimientosRepository.getAllMovimientoXHoy(fecha_formateada,cuenta.getIdCuenta());
+                if(movimientoHoy!=null && !movimientoHoy.isEmpty()){
+                    for (MovimientosEntity entity : movimientoHoy){
+                        if(entity!=null && entity.getIdMovimientos()!=null && entity.getValor()!=null){
+                            SumaTotal = entity.getValor() + SumaTotal;
+                        }
+                    }
+                }
+            }
+            return this.responseApiBuilder.successRespuesta(SumaTotal,"total_movimiento_hoy");
+        }catch (Exception e) {
+            System.err.println("Error al buscar todas la cuentas: " + e.getMessage());
+            return this.responseApiBuilder.errorRespuesta("NO_DATA_AVAILABLE");
+        }
+    }
+
+
+
 
 }

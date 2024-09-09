@@ -16,11 +16,13 @@ public class MovimientoDto {
 
     private Integer idMovimientos;
 
+    private Integer idCuenta;
+
     private String numCuenta;
 
     private Date fecha;
 
-    private String idTipoMovimiento;
+    private Integer idTipoMovimiento;
 
     private Double valor;
 

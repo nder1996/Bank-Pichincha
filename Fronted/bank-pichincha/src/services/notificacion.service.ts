@@ -16,7 +16,7 @@ export class NotificacionService {
   openDialog(tipo: string, icon: string, mensaje: string): void {
     const dialogRef: MatDialogRef<NotificacionMensajeComponent> =
       this.dialog.open(NotificacionMensajeComponent, {
-        width: '550px',
+        width: '400px',
         position: { top: '20px', right: '20px' },
         data: { tipo, icon, mensaje },
         backdropClass: 'first-modal-backdrop',

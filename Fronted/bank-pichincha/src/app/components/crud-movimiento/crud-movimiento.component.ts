@@ -21,6 +21,7 @@ import { Subscription } from 'rxjs';
 import { TipoMovimiento } from 'src/model/tipo-movimiento.model';
 import { PrecioFormatService } from 'src/services/precio-format.service';
 import { ApiResponse } from 'src/model/api-response.model';
+import { CuentaModel } from 'src/model/cuenta-models';
 
 @Component({
   selector: 'app-crud-movimiento',
@@ -43,7 +44,7 @@ export class CrudMovimientoComponent implements OnInit, OnDestroy {
     private loadingService: LoadingService, private fb: FormBuilder) { }
 
   private subscription!: Subscription;
-  public listMovimiento: any[]=[];
+  public listMovimiento: any[] = [];
   public movimiento: MovimientoModel = new MovimientoModel();
 
 
@@ -74,8 +75,8 @@ export class CrudMovimientoComponent implements OnInit, OnDestroy {
   updateTableMovimientos() {
     this.getAllMovimiento();
     this.dataSource.data = [];
-    this.dataSource.data =this.listMovimiento;
-    console.log("movimiento : "+JSON.stringify(this.listMovimiento))
+    this.dataSource.data = this.listMovimiento;
+    console.log("movimiento : " + JSON.stringify(this.listMovimiento))
 
     this.dataSource.filterPredicate = (data, filter): boolean => {
       const filterObject = JSON.parse(filter);
@@ -203,12 +204,12 @@ export class CrudMovimientoComponent implements OnInit, OnDestroy {
   public getAllMovimiento() {
     this.subscription = this.movimientoService.getAllMovimientos()
       .subscribe(
-        (response:any) => {
-          if(response &&  response.data && response.data.Movimientos){
+        (response: any) => {
+          if (response && response.data && response.data.Movimientos) {
             this.listMovimiento = response.data.Movimientos;
             this.dataSource.data = response.data.Movimientos;
+            console.log("entro al metodo getAllMetodo "+JSON.stringify( this.dataSource.data))
           }
-         // console.log('LISTA DE MOVIMIENTOS : '+JSON.stringify( this.listMovimiento ));
         },
         (error) => {
           this.notificacionService.openDialog('error', 'error_outline', error.details);
@@ -229,53 +230,42 @@ export class CrudMovimientoComponent implements OnInit, OnDestroy {
       );
   }
 
-  public deleteByMovimiento(idMovimiento: number) {
-    this.movimiento = new MovimientoModel();
-    this.subscription = this.movimientoService.deleteMovimiento(idMovimiento)
-      .subscribe(
-        (response: any) => {
-          //this.movimiento =response.data.movimiento;
-          this.notificacionService.openDialog('info', 'info', response.data.movimiento);
-          this.getAllMovimiento();
-        },
-        (error) => {
-          this.notificacionService.openDialog('error', 'error_outline', error.details);
-        }
-      );
-  }
+
 
 
 
 
   dialogAgregarMovimiento(tipoModal: string) {
-
     const dialogRef = this.dialog.open(dialogOpciones, {
       width: '500px',
       disableClose: false,
       data: { movimiento: this.listMovimiento, tipoModal: tipoModal }
     });
-
-    dialogRef.componentInstance.movimiento.subscribe((movimiento: MovimientoModel) => {
-      this.dataSource.data = [];
-      // this.dataSource.data.push(movimiento);
-      this.dataSource.paginator = this.paginator;
-      this.cdr.detectChanges();
-      dialogRef.close();
+    dialogRef.afterClosed().subscribe(() => {
+      this.getAllMovimiento();
     });
   }
 
-  dialogEditarMovimiento(tipoModal: string) {
+
+  dialogEliminarMovimiento(idMovimiento:number,tipoModal: string) {
     const dialogRef = this.dialog.open(dialogOpciones, {
       width: '500px',
-      disableClose: false
+      disableClose: false,
+      data: { idMovimiento: idMovimiento, tipoModal: tipoModal }
     });
+    dialogRef.afterClosed().subscribe(() => {
+      this.getAllMovimiento();
+    });
+  }  
 
-    dialogRef.componentInstance.movimiento.subscribe((movimiento: MovimientoModel[]) => {
-      this.dataSource.data = [];
-      // this.dataSource.data.push(movimiento);
-      this.dataSource.paginator = this.paginator;
-      this.cdr.detectChanges();
-      dialogRef.close();
+
+
+
+  dialogEditarMovimiento(movimiento:any,tipoModal: string) {
+    const dialogRef = this.dialog.open(dialogOpciones, {
+      width: '500px',
+      disableClose: false,
+      data: { movimiento: movimiento, tipoModal: tipoModal }
     });
 
   }
@@ -299,7 +289,7 @@ export class CrudMovimientoComponent implements OnInit, OnDestroy {
   encapsulation: ViewEncapsulation.None,
 })
 export class dialogOpciones {
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { movimiento: MovimientoModel[], tipoModal: string },
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { movimientos: MovimientoModel[], tipoModal: string , idMovimiento:number , movimiento:any},
     private fb: FormBuilder, private dialogRef: MatDialogRef<dialogOpciones>,
     private notificacionService: NotificacionService, private router: Router,
     private movimientoService: MovimientoService, private cdr: ChangeDetectorRef, private decimalPipe: DecimalPipe,
@@ -310,18 +300,21 @@ export class dialogOpciones {
   public ListTipoMovimiento: TipoMovimiento[] = [];
   public listTodosMovimiento: MovimientoModel[] = [];
   public formMovimiento!: FormGroup;
+  public formMovimientoEditar!: FormGroup;
   public movimientoSave: MovimientoModel = new MovimientoModel();
   public saldoFinal: number = 0.0;
+  public listCuentas: any[] = [];
+  
 
 
   public saveMovimiento(movimiento: MovimientoModel) {
     this.subscription = this.movimientoService.saveMovimiento(movimiento)
       .subscribe(
         (response: any) => {
-          if(response.Movimiento=="Movimiento Creado"){
-            this.notificacionService.openDialog('success', 'check_circle', response.Movimiento);
-          }else{
-            this.notificacionService.openDialog('error', 'error_outline', response.error.details);
+          if (response.data.Movimiento == "Movimiento Creado") {
+            this.notificacionService.openDialog('success', 'check_circle', response.data.Movimiento);
+          } else {
+            this.notificacionService.openDialog('error', 'error_outline', 'Inténtalo nuevamente');
           }
         },
         (error) => {
@@ -346,10 +339,33 @@ export class dialogOpciones {
   }
 
 
+  public getAllCuentas() {
+    this.listCuentas = []
+    this.subscription = this.movimientoService.getAllCuenta()
+      .subscribe(
+        (response: any) => {
+          this.listCuentas = response.data.cuentas;
+          console.log("lista de cuentas : " + JSON.stringify(this.listCuentas))
+        },
+        (error) => {
+          this.notificacionService.openDialog('error', 'error_outline', error.details);
+        }
+      );
+  }
+
+
+
   ngOnInit() {
     this.formMovimiento = this.fb.group({
       numeroCuenta: [null, Validators.required],
       tipoMovimiento: [null, Validators.required],
+      valorMovimiento: [null, [Validators.required, Validators.pattern('^[0-9]*$')]],
+      saldo: [{ value: '', disabled: true }, Validators.required]
+    });
+
+    this.formMovimientoEditar = this.fb.group({
+      numeroCuenta: [this.data.movimiento.numCuenta, Validators.required],
+      tipoMovimiento: [Validators.required],
       valorMovimiento: [null, [Validators.required, Validators.pattern('^[0-9]*$')]],
       saldo: [{ value: '', disabled: true }, Validators.required]
     });
@@ -359,6 +375,7 @@ export class dialogOpciones {
   ngAfterViewInit() {
     setTimeout(() => {
       this.getAllTipoMovimiento();
+      this.getAllCuentas();
       this.listTodosMovimiento = this.data.movimiento;
       console.log(JSON.stringify(this.listTodosMovimiento))
       this.formatSaldoCuenta();
@@ -368,15 +385,14 @@ export class dialogOpciones {
 
 
 
-
   private formatSaldoCuenta() {
     this.formMovimiento.get('numeroCuenta')?.valueChanges.subscribe(
-      (idCuenta: any) => {
-        this.listTodosMovimiento.forEach(movimiento => {
-          if (movimiento.idMovimientos == idCuenta) {
-            const saldo_cuenta = movimiento.saldo ?? 0.0;
+      (numCuenta: any) => {
+        this.listCuentas.forEach(cuenta => {
+          if (cuenta.NUMERO_CUENTA == numCuenta) {
+            const SALDO_INICIAL = cuenta.SALDO_INICIAL ?? 0.0;
             this.formMovimiento.patchValue({
-              saldo: this.monedaService.formatoUSD(saldo_cuenta.toString()),
+              saldo: this.monedaService.formatoUSD(SALDO_INICIAL.toString()),
             });
           }
         })
@@ -384,14 +400,12 @@ export class dialogOpciones {
     );
   }
 
-  //this.dialogService.openDialog('alert', 'warning', 'Este es un mensaje de notificación.'); //alert
-
 
 
   public movimientoBancarioRespuesta() {
     const saldo: number = parseFloat(this.formMovimiento.get('saldo')?.value.replace(/[^0-9.-]/g, ''));
     const idTipoMovimiento: number = this.formMovimiento.get('tipoMovimiento')?.value ?? -1;
-    if (saldo && idTipoMovimiento!=-1) {
+    if (saldo && idTipoMovimiento != -1) {
       const valorMovimiento = +this.formMovimiento.get('valorMovimiento')?.value.replace(/[^0-9.-]/g, '');
       this.ListTipoMovimiento.forEach(tipoMovimiento => {
         if (tipoMovimiento.idTipoMovimientos == idTipoMovimiento) {
@@ -402,8 +416,17 @@ export class dialogOpciones {
                 valorMovimiento: '',
               });
             } else {
-              this.saldoFinal = saldo - valorMovimiento;
+              if(valorMovimiento>=1000){
+                this.saldoFinal = saldo - valorMovimiento;
+              }else{
+                this.notificacionService.openDialog('alert', 'warning', 'Has excedido el límite diario de retiros permitido para esta cuenta');
+                this.formMovimiento.patchValue({
+                  valorMovimiento: '',
+                });
+              }
             }
+          } if (tipoMovimiento.nombre == 'DEPÓSITO') {
+            this.saldoFinal = saldo + valorMovimiento;
           }
         }
       })
@@ -417,18 +440,37 @@ export class dialogOpciones {
 
 
   guardarMovimiento() {
-  //  alert('ola mundo')
     if (this.formMovimiento.valid) {
       this.movimientoSave.fecha = new Date();
-      this.movimientoSave.idTipoMovimiento =  this.formMovimiento.get('tipoMovimiento')?.value;
-      this.movimientoSave.numCuenta =  this.formMovimiento.get('numeroCuenta')?.value;
+      this.movimientoSave.idTipoMovimiento = this.formMovimiento.get('tipoMovimiento')?.value;
+      this.movimientoSave.numCuenta = this.formMovimiento.get('numeroCuenta')?.value;
       this.movimientoSave.saldo = this.saldoFinal;
       this.movimientoSave.valor = this.formMovimiento.get('valorMovimiento')?.value;
       this.movimientoSave.estado = 'TRUE';
-      console.log("data movmiento : "+JSON.stringify((this.movimientoSave)))
       this.saveMovimiento(this.movimientoSave);
+      this.dialogRef.close();
     }
   }
 
+
+
+
+
+
+
+
+
+  public deleteByMovimiento() {
+    this.subscription = this.movimientoService.deleteMovimiento(this.data.idMovimiento)
+      .subscribe(
+        (response: any) => {
+          this.notificacionService.openDialog('info', 'info', response.data.movimiento);
+        },
+        (error) => {
+          this.notificacionService.openDialog('error', 'error_outline', error.details);
+        }
+      );
+      this.dialogRef.close()
+  }
 
 }

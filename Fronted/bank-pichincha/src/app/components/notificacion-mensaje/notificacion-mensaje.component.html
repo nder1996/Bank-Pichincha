@@ -76,22 +76,33 @@
 
     .dialog strong {
         display: flex;
+        flex-direction: row;
         justify-content: center;
         align-items: center;
         align-content: center;
         gap: 10px;
     }
 
-    .dialog strong i {
-        font-size: 1.8rem !important
+    /*.dialog strong .icon{
+        font-size: 1.8rem !important;
+    }*/
+
+    .container-text{
+        display: inline-block;
+        vertical-align: middle;
+        text-align: justify;
+        font-size: 0.8;
+        width: 350px;
     }
 </style>
 
 
 <div mat-dialog-content class="dialog" [ngClass]="data.tipo">
     <strong>
-        <mat-icon>{{ data.icon }}</mat-icon>
-        <span style="font-size: 13px;">
+        <span class="d-flex justify-content-center align-content-center" style="font-size: 1rem;">
+            <mat-icon class="icon">{{ data.icon }}</mat-icon>
+        </span>
+        <span class="container-text">
             {{ data.mensaje }}
         </span>
     </strong>

@@ -20,10 +20,9 @@ public interface CuentaRepository extends JpaRepository<CuentaEntity, Integer> {
     @Query(value = "SELECT * FROM Cuenta WHERE idCuenta = :idCuenta AND estado = 'TRUE'", nativeQuery = true)
     CuentaEntity getByIdCuenta(@Param("idCuenta") Integer idCuenta);
 
-    @Query(value = "select * from Cuenta as cuenta " +
-            "left join Movimientos as movimiento on cuenta.idCuenta = movimiento.idMovimientos " +
-            "where cuenta.estado = 'TRUE' and movimiento.estado = 'TRUE' and cuenta.numeroCuenta = :numCuenta", nativeQuery = true)
-    CuentaEntity getByIdCuentaxNumCuenta(@Param("numCuenta") Integer numCuenta);
+    @Query(value = "select cuenta.* from Cuenta as cuenta " +
+            "where cuenta.estado = 'TRUE' and cuenta.numeroCuenta = :numCuenta ", nativeQuery = true)
+    CuentaEntity getByIdCuentaxNumCuenta(@Param("numCuenta") String numCuenta);
 
 
 

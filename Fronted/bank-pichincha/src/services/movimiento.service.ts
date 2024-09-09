@@ -40,4 +40,8 @@ export class MovimientoService {
     return this.httpClient.get<any>(`${this.movimientoUrl}/getAllTipoMovimiento`);
   }
 
+  public getAllCuenta(): Observable<any> {
+    return this.httpClient.get<any>(`${this.movimientoUrl}/getAllCuentas`);
+  }
+
 }

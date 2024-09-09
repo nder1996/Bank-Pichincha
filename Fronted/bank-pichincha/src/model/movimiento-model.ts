@@ -1,6 +1,6 @@
 export class MovimientoModel {
   idMovimientos?: number;
-  numCuenta?: number;
+  numCuenta?: string;
   fecha?: Date;
   idTipoMovimiento?: number;
   valor?: number;
@@ -9,7 +9,7 @@ export class MovimientoModel {
 
   constructor(
     idMovimientos?: number,
-    numCuenta?: number,
+    numCuenta?: string,
     idTipoMovimiento?: number,
     valor?: number,
     fecha?: Date,

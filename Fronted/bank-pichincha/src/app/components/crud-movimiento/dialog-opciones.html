@@ -8,7 +8,7 @@
   }
 </style>
 
-<ng-container>
+<ng-container *ngIf="data.tipoModal=='Agregar'">
   <h2 mat-dialog-title style="text-align: center;">AGREGAR MOVIMIENTO</h2>
   <form [formGroup]="formMovimiento" class="container">
     <mat-dialog-content>
@@ -18,8 +18,8 @@
           <mat-form-field class="example-form-field">
             <mat-label>NÚMEROS DE CUENTA</mat-label>
             <mat-select formControlName="numeroCuenta">
-              <mat-option *ngFor="let movimiento of listTodosMovimiento" [value]="movimiento.numCuenta">
-                {{ movimiento.numCuenta }}
+              <mat-option *ngFor="let cuenta of listCuentas" [value]="cuenta.NUMERO_CUENTA">
+                {{ cuenta.NUMERO_CUENTA }}
               </mat-option>
             </mat-select>
             <mat-error *ngIf="formMovimiento.get('numeroCuenta')?.hasError('required')">
@@ -70,15 +70,78 @@
       <button mat-button color="primary" (click)="guardarMovimiento()">Guardar</button>
     </mat-dialog-actions>
   </form>
-  
-
-
-
-
-<ng-container>
-
 </ng-container>
 
-<ng-container>
+<ng-container *ngIf="data.tipoModal=='Eliminar'">
+  <div style="padding: 0.5rem !important;margin: 1rem !important;">
+    <h1 class="mb-3" style="text-align: center !important;"><strong>¿Deseas eliminar el registro?</strong></h1>
+        <mat-dialog-actions align="center">
+          <button mat-button mat-dialog-close>Cancelar</button>
+          <button mat-button color="primary" (click)="deleteByMovimiento()">Eliminar</button>
+        </mat-dialog-actions>
+  </div>
+</ng-container>
 
+
+<ng-container  *ngIf="data.tipoModal=='Editar'">
+  <form [formGroup]="formMovimiento" class="container">
+    <mat-dialog-content>
+      <div class="row">
+        <div class="col-12">
+          <label>NÚMEROS DE CUENTA</label>
+          <mat-form-field class="example-form-field">
+            <mat-label>NÚMEROS DE CUENTA</mat-label>
+            <mat-select formControlName="numeroCuenta">
+              <mat-option *ngFor="let cuenta of listCuentas" [value]="cuenta.NUMERO_CUENTA">
+                {{ cuenta.NUMERO_CUENTA }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formMovimiento.get('numeroCuenta')?.hasError('required')">
+              Este campo es requerido.
+            </mat-error>
+          </mat-form-field>
+          <pre></pre>
+        </div>
+        <div class="col-12">
+          <label>TIPO DE MOVIMIENTO</label>
+          <mat-form-field class="example-form-field">
+            <mat-label>TIPO DE MOVIMIENTO</mat-label>
+            <mat-select formControlName="tipoMovimiento">
+              <mat-option *ngFor="let tipo of ListTipoMovimiento" [value]="tipo.idTipoMovimientos">
+                {{ tipo.nombre }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formMovimiento.get('tipoMovimiento')?.hasError('required')">
+              Este campo es requerido.
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-12">
+          <label>VALOR DEL MOVIMIENTO</label>
+          <mat-form-field class="example-form-field">
+            <input matInput formControlName="valorMovimiento" (blur)="movimientoBancarioRespuesta()" type="text">
+            <mat-error *ngIf="formMovimiento.get('valorMovimiento')?.hasError('required')">
+              Este campo es requerido.
+            </mat-error>
+            <mat-error *ngIf="formMovimiento.get('valorMovimiento')?.hasError('pattern')">
+              Debe ser un número válido.
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-12">
+          <label>SALDO ACTUAL</label>
+          <mat-form-field class="example-form-field">
+            <input matInput formControlName="saldo" type="text" [disabled]="true">
+            <mat-error *ngIf="formMovimiento.get('saldo')?.hasError('required')">
+              Este campo es requerido.
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="center">
+      <button mat-button mat-dialog-close>Cancelar</button>
+      <button mat-button color="primary" (click)="guardarMovimiento()">Guardar</button>
+    </mat-dialog-actions>
+  </form>
 </ng-container>

@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/movimientos")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -51,6 +53,16 @@ public class MovimientoController {
     @GetMapping("/getAllTipoMovimiento")
     public ResponseEntity<ApiResponse<String>> getAllTipoMovimiento() {
         return new ResponseEntity<>(movimientoService.getAllTipoMovimiento(), HttpStatus.OK);
+    }
+
+    @GetMapping("/getAllCuentas")
+    public ResponseEntity<ApiResponse<String>> getAllCuentas() {
+        return new ResponseEntity<>(movimientoService.getAllCuenta(), HttpStatus.OK);
+    }
+
+    @GetMapping("/movimientosHoyRetiro/{numeroCuenta}")
+    public ResponseEntity<ApiResponse<String>> movimientosHoyRetiro(@PathVariable String numeroCuenta) {
+        return new ResponseEntity<>(movimientoService.movimientosHoyRetiro(numeroCuenta), HttpStatus.OK);
     }
 
 

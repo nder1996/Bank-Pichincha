@@ -39,7 +39,11 @@ public class ErrorDetailResponse {
             new ErrorDetailResponse(400, "BANK_MOVEMENT_NOT_UPDATED", "Hubo un error al actualizar el movimiento bancario. Por favor, verifica los datos proporcionados e inténtalo de nuevo."),
             new ErrorDetailResponse(400, "MOVEMENT_NOT_FOUND", "Hubo un error al buscar el movimiento. Por favor, verifica los datos proporcionados e inténtalo de nuevo."),
             new ErrorDetailResponse(400, "MOVEMENTS_NOT_FOUND", "Hubo un error al buscar todos los movimientos."),
-            new ErrorDetailResponse(400, "MOVEMENT_NOT_DELETED", "Hubo un error al eliminar el movimiento. Por favor, verifica los datos proporcionados e inténtalo de nuevo.")
+            new ErrorDetailResponse(400, "MOVEMENT_NOT_DELETED", "Hubo un error al eliminar el movimiento. Por favor, verifica los datos proporcionados e inténtalo de nuevo."),
+            new ErrorDetailResponse(400, "INVALID_MOVEMENT_TYPE", "Hubo un error con el tipo de movimiento proporcionado. Por favor, verifica los datos e inténtalo de nuevo."),
+            new ErrorDetailResponse(400, "DAILY_WITHDRAWAL_LIMIT_EXCEEDED", "Has excedido el límite diario de retiros permitido para esta cuenta. Por favor, espera hasta el próximo día para realizar más retiros o contacta con el soporte para más información."
+    )
+
 
 
 
